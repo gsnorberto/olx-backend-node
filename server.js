@@ -17,7 +17,6 @@ mongoose.Promise = global.Promise;
 mongoose.connection.on('error', (error) => {
     console.log("Erro: ", error.message);
 });
-
 const server = express();
 
 server.use(cors());
