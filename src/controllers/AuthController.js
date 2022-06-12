@@ -60,6 +60,7 @@ module.exports = {
         // checking the State
         if(mongoose.Types.ObjectId.isValid(data.state)){
             const stateItem = await State.findById(data.state);
+
             if(!stateItem){
                 res.json({
                     error: {state: {msg: 'Estado não existe'}}

@@ -3,23 +3,25 @@ const User = require('../models/User');
 const Category = require('../models/Category');
 const Ad = require('../models/Ad');
 const { validationResult, matchedData } = require('express-validator');
+const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 
 module.exports = {
-    getStates: async ( req, res ) => {
+    getStates: async (req, res) => {
         let states = await State.find();
         res.json({ states })
     },
 
-    info: async ( req, res ) => {
+    info: async (req, res) => {
         let token = req.query.token;
-        
-        const user = await User.findOne({token});
+
+        const user = await User.findOne({ token });
         const state = await State.findById(user.state);
-        const ads = await Ad.find({idUser: user._id.toString()});
+        const ads = await Ad.find({ idUser: user._id.toString() });
 
         let adList = [];
 
-        for(let i in ads){
+        for (let i in ads) {
 
             const cat = await Category.findById(ads[i].category);
 
@@ -38,7 +40,7 @@ module.exports = {
 
             // or
 
-            adList.push({ ...ads[i], category: cat.slug});
+            adList.push({ ...ads[i], category: cat.slug });
         }
 
         res.json({
@@ -49,10 +51,12 @@ module.exports = {
         })
     },
 
-    editAction: async ( req, res ) => {
+    editAction: async (req, res) => {
+
         const errors = validationResult(req);
-        if(!errors.isEmpty()){
-            res.json({error: errors.mapped()});
+
+        if (!errors.isEmpty()) {
+            res.json({ error: errors.mapped() });
             return;
         }
         const data = matchedData(req);
@@ -61,19 +65,39 @@ module.exports = {
 
         let updates = {}
 
-        if(data.name){
-            updates.name;
+        if (data.name) {
+            updates.name = data.name;
         }
-        
-        if(data.email){
-            const emailCheck = await User.findOne({ email: data.email }); 
 
-            if(emailCheck){
-                res.json({ error: 'E-mail já existene '});
+        if (data.email) {
+            const emailCheck = await User.findOne({ email: data.email });
+
+            if (emailCheck) {
+                res.json({ error: 'E-mail já existene ' });
                 return;
             }
 
             updates.email = data.email;
+        }
+
+        if (data.state) {
+            if (mongoose.Types.ObjectId.isValid(data.state)) {
+                const stateCheck = await State.findById({ state: data.state });
+
+                if (!stateCheck) {
+                    res.json({ error: 'Estado não existe ' });
+                    return;
+                }
+
+                updates.state = data.state;
+            } else {
+                res.json({ error: 'Estado não existe ' });
+                return;
+            }
+        }
+
+        if (data.password) {
+            updates.passwordHash = await bcrypt.hash(data.password, 10);
         }
 
         await User.findOneAndUpdate({ token: data.token }, { $set: updates })
