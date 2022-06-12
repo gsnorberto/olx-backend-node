@@ -2,12 +2,14 @@ const State = require('../models/State');
 const User = require('../models/User');
 const Category = require('../models/Category');
 const Ad = require('../models/Ad');
+const { validationResult, matchedData } = require('express-validator');
 
 module.exports = {
     getStates: async ( req, res ) => {
         let states = await State.find();
         res.json({ states })
     },
+
     info: async ( req, res ) => {
         let token = req.query.token;
         
@@ -46,7 +48,36 @@ module.exports = {
             ads: adList
         })
     },
+
     editAction: async ( req, res ) => {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            res.json({error: errors.mapped()});
+            return;
+        }
+        const data = matchedData(req);
+
+        // const user = await User.findOne({ token: data.token });
+
+        let updates = {}
+
+        if(data.name){
+            updates.name;
+        }
+        
+        if(data.email){
+            const emailCheck = await User.findOne({ email: data.email }); 
+
+            if(emailCheck){
+                res.json({ error: 'E-mail já existene '});
+                return;
+            }
+
+            updates.email = data.email;
+        }
+
+        await User.findOneAndUpdate({ token: data.token }, { $set: updates })
+
         res.json({})
     }
-}
+} 
