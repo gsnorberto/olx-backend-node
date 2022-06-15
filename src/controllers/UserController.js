@@ -13,7 +13,14 @@ module.exports = {
     },
 
     info: async (req, res) => {
-        let token = req.query.token;
+        let token;
+
+        if(req.query.token){
+            token = req.query.token;
+        }
+        if(req.body.token){
+            token = req.body.token;
+        }
 
         const user = await User.findOne({ token });
         const state = await State.findById(user.state);
@@ -82,7 +89,7 @@ module.exports = {
 
         if (data.state) {
             if (mongoose.Types.ObjectId.isValid(data.state)) {
-                const stateCheck = await State.findById({ state: data.state });
+                const stateCheck = await State.findById(data.state );
 
                 if (!stateCheck) {
                     res.json({ error: 'Estado não existe ' });

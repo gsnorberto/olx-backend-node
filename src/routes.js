@@ -29,4 +29,4 @@ router.get('/ad/list', AdsController.getList);
 router.get('/ad/item', AdsController.getItem);
 router.post('/ad/:id', Auth.private, AdsController.editAction); //private
 
-module.exports = router;
+module.exports = router; 
