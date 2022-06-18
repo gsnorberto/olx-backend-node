@@ -2,7 +2,16 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 const modelSchema = new mongoose.Schema({
-    name: String
+        status: String,
+        idUser: String,
+        state: String,
+        dateCreated: Date,
+        title: String,
+        category: String,
+        price: Number,
+        priceNegotiable: Boolean,
+        description: String,
+        views: Number
 });
 
 const modelName = 'Ad';
