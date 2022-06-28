@@ -11,7 +11,8 @@ const modelSchema = new mongoose.Schema({
         price: Number,
         priceNegotiable: Boolean,
         description: String,
-        views: Number
+        views: Number,
+        images: [Object]
 });
 
 const modelName = 'Ad';
