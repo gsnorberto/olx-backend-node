@@ -38,7 +38,7 @@ module.exports = {
             return;
         }
 
-        if (price) {
+        if (price) { // R$7.000,20 => 7000.20
             price = price.replace('.', '').replace(',', '.').replace('R$ ', ''); //converting national to international currency
             price = parseFloat(price)
         } else {
@@ -222,6 +222,65 @@ module.exports = {
     },
 
     editAction: async (req, res) => {
+        let { id } = req.params;
+        let { title, status, price, priceneg, desc, cat, images, token } = req.body;
 
+        if(id.length < 12){
+            res.json({ error: 'ID inválido' });
+            return;
+        }
+
+        const ad = await Ad.findById(id).exec();
+
+        if(!ad){
+            res.json({ error: 'Anúncio inexistente' });
+            return;
+        }
+
+        const user = await User.findOne({ token }).exec();
+        if(user._id.toString() !== ad.idUser){
+            res.json({ error: 'Este anúncio pertence a outro usuário' });
+            return;
+        }
+
+        let updates = {};
+
+        if(title){
+            updates.title = title;
+        }
+        if(price){ // R$7.000,20 => 7000.20
+            price = price.replace('.', '').replace(',', '.').replace('R$ ', ''); //converting national to international currency
+            price = parseFloat(price);
+            updates.price = price;
+        }
+        if(priceneg){
+            updates.priceNegotiable = priceneg;
+        }
+        if(status){
+            updates.status = status;
+        }
+        if(desc){
+            updates.description = desc;
+        }
+        if(cat){
+            const category = await Category.findOne({ slug: cat }).exec();
+
+            if(!category){
+                res.json({ error: 'Categoria inexistente' });
+                return;
+            }
+
+            updates.category = category._id.toString();
+        }
+
+        if(images){
+            updates.images = images;
+        }
+
+        await Ad.findByIdAndUpdate(id, {$set: updates});
+
+        // New Images
+
+        res.json({ error: ''});
     }
 }
